@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Upload — Postlyra</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%231F7A6C'/><rect x='25' y='25' width='50' height='50' rx='10' fill='%23E8633A'/></svg>" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --paper: #FAF6EF;
+            --ink: #1E2A26;
+            --ink-soft: #4A5650;
+            --teal: #1F7A6C;
+            --teal-deep: #16241F;
+            --coral: #E8633A;
+            --line: rgba(30, 42, 38, 0.12);
+            --radius: 14px;
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            background: var(--paper);
+            color: var(--ink);
+            font-family: 'Inter', sans-serif;
+        }
+        a { color: inherit; text-decoration: none; }
+        :focus-visible { outline: 2px solid var(--coral); outline-offset: 3px; }
+        .mono { font-family: 'IBM Plex Mono', monospace; }
+
+        .nav {
+            background: rgba(250, 246, 239, 0.92);
+            border-bottom: 1px solid var(--line);
+            backdrop-filter: blur(8px);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .nav__inner {
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 0 32px;
+            height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .logo { display: inline-flex; align-items: center; gap: 8px; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 18px; }
+        .logo-mark { width: 16px; height: 16px; border-radius: 4px; background: var(--teal); position: relative; }
+        .logo-mark::after { content: ''; position: absolute; top: 50%; left: 50%; width: 5px; height: 5px; background: var(--coral); border-radius: 2px; transform: translate(-50%,-50%); }
+        .back-link { font-size: 14px; color: var(--ink-soft); }
+        .back-link:hover { color: var(--ink); }
+        .nav__right { display: flex; align-items: center; gap: 18px; }
+
+        main { max-width: 1080px; margin: 0 auto; padding: 56px 32px 100px; }
+        .eyebrow {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            letter-spacing: .06em;
+            color: var(--teal);
+            text-transform: uppercase;
+            margin-bottom: 14px;
+            display: inline-block;
+        }
+        h1 { font-family: 'Space Grotesk', sans-serif; font-size: 32px; margin-bottom: 10px; }
+        .lead { color: var(--ink-soft); font-size: 16px; max-width: 560px; margin-bottom: 36px; }
+
+        .card {
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: 32px;
+            margin-bottom: 28px;
+        }
+
+        /* dropzone */
+        .dropzone {
+            border: 1.5px dashed var(--line);
+            border-radius: var(--radius);
+            padding: 36px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+            position: relative;
+        }
+        .dropzone:hover, .dropzone.dragover { border-color: var(--teal); background: rgba(31,122,108,0.03); }
+        .dropzone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+        .dropzone__icon { font-size: 28px; margin-bottom: 10px; }
+        .dropzone__text { color: var(--ink-soft); font-size: 14.5px; }
+        .dropzone__text strong { color: var(--coral); }
+
+        .preview-row { display: flex; align-items: center; gap: 18px; margin-top: 18px; }
+        .preview-thumb {
+            width: 84px; height: 84px; border-radius: 10px; object-fit: cover;
+            border: 1px solid var(--line); display: none;
+        }
+        .preview-meta { font-size: 14px; color: var(--ink-soft); display: none; }
+        .preview-meta strong { color: var(--ink); }
+        .clear-btn {
+            background: none; border: none; color: var(--coral); font-size: 13px;
+            cursor: pointer; font-family: inherit; font-weight: 500; display: none;
+        }
+
+        /* platform + format picker */
+        .section-label {
+            font-size: 14px; font-weight: 600; margin-bottom: 14px; display: flex;
+            align-items: center; justify-content: space-between;
+        }
+        .select-all-btn {
+            background: none; border: none; color: var(--teal); font-size: 13px;
+            font-weight: 500; cursor: pointer; font-family: inherit;
+        }
+        .platform-block { margin-bottom: 18px; }
+        .platform-block:last-child { margin-bottom: 0; }
+        .platform-block__header {
+            display: flex; align-items: center; gap: 9px; font-size: 14px; font-weight: 600;
+            margin-bottom: 9px; cursor: pointer; user-select: none;
+        }
+        .platform-block__header input { accent-color: var(--coral); width: 16px; height: 16px; }
+        .format-row { display: flex; flex-wrap: wrap; gap: 8px; padding-left: 25px; }
+        .format-chip {
+            display: flex; align-items: center; gap: 7px;
+            border: 1px solid var(--line); border-radius: 9px;
+            padding: 8px 12px; cursor: pointer; transition: all 0.2s;
+            font-size: 13px; color: var(--ink-soft);
+        }
+        .format-chip:hover { border-color: var(--teal); }
+        .format-chip input { accent-color: var(--coral); width: 14px; height: 14px; }
+        .format-chip.checked { background: rgba(31,122,108,0.05); border-color: var(--teal); color: var(--ink); }
+        .format-chip .ratio { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--teal); }
+
+        .generate-btn {
+            margin-top: 24px;
+            background: var(--coral);
+            color: #fff;
+            border: none;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 15px;
+            padding: 14px 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.25s var(--ease-out-expo);
+            box-shadow: 0 4px 0 rgba(0,0,0,0.06);
+        }
+        .generate-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(232,99,58,0.32); }
+        .generate-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+        .banner {
+            font-size: 13.5px; padding: 12px 16px; border-radius: 8px; margin-top: 18px; display: none;
+        }
+        .banner.visible { display: block; }
+        .banner--error { background: rgba(232,99,58,0.10); color: #B8431E; }
+        .banner--info { background: rgba(31,122,108,0.08); color: var(--teal); }
+
+        .loading-state { display: none; align-items: center; gap: 12px; margin-top: 18px; color: var(--ink-soft); font-size: 14px; }
+        .loading-state.visible { display: flex; }
+        .spinner {
+            width: 16px; height: 16px; border-radius: 50%;
+            border: 2px solid var(--line); border-top-color: var(--teal);
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
+
+        /* results, grouped by platform */
+        #results { display: none; }
+        #results.visible { display: block; }
+        .platform-result {
+            background: #fff; border: 1px solid var(--line); border-radius: var(--radius);
+            padding: 24px; margin-bottom: 22px;
+        }
+        .platform-result__title {
+            font-family: 'Space Grotesk', sans-serif; font-size: 17px; margin-bottom: 16px;
+        }
+        .image-row {
+            display: flex; gap: 14px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 20px;
+        }
+        .image-card { flex-shrink: 0; width: 160px; }
+        .image-card__img {
+            width: 160px; height: 160px; object-fit: contain; background: var(--teal-deep);
+            border-radius: 10px; display: block;
+        }
+        .image-card__label {
+            font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: var(--ink-soft);
+            margin-top: 6px; text-align: center;
+        }
+
+        .caption-panel { border-top: 1px solid var(--line); padding-top: 18px; }
+        .caption-options { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+        .caption-option-btn {
+            background: var(--paper); border: 1px solid var(--line); border-radius: 8px;
+            padding: 8px 14px; font-size: 13px; font-weight: 500; color: var(--ink-soft);
+            cursor: pointer; font-family: inherit; transition: all 0.2s;
+        }
+        .caption-option-btn:hover { border-color: var(--teal); }
+        .caption-option-btn.active { background: rgba(31,122,108,0.08); border-color: var(--teal); color: var(--teal); }
+        .caption-textarea {
+            width: 100%; min-height: 100px; font-family: inherit; font-size: 14px;
+            color: var(--ink); border: 1px solid var(--line); border-radius: 8px;
+            padding: 12px 14px; resize: vertical; background: var(--paper);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .caption-textarea:focus {
+            outline: none; border-color: var(--coral); background: #fff;
+            box-shadow: 0 0 0 3px rgba(232, 99, 58, 0.14);
+        }
+        .caption-panel__footer {
+            display: flex; align-items: center; justify-content: space-between; margin-top: 10px;
+        }
+        .caption-hint { font-size: 12px; color: var(--ink-soft); }
+        .copy-btn {
+            background: none; border: 1px solid var(--line); border-radius: 7px;
+            padding: 7px 14px; font-size: 12.5px; font-weight: 500; color: var(--ink);
+            cursor: pointer; font-family: inherit; transition: all 0.2s;
+        }
+        .copy-btn:hover { border-color: var(--teal); color: var(--teal); }
+        .copy-btn.copied { border-color: var(--teal); color: var(--teal); background: rgba(31,122,108,0.06); }
+    </style>
+</head>
+<body>
+    <header class="nav">
+        <div class="nav__inner">
+            <a href="index.html" class="logo">
+                <span class="logo-mark" aria-hidden="true"></span>
+                Postlyra
+            </a>
+            <div class="nav__right">
+                <a href="accounts.html" class="back-link">Accounts</a>
+                <a href="history.html" class="back-link">Past projects</a>
+                <a href="dashboard.html" class="back-link">← Back to dashboard</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <span class="eyebrow">Upload</span>
+        <h1>Turn one photo into every post</h1>
+        <p class="lead">Pick a photo and the exact sizes you want it in — Postlyra will resize it for each (nothing gets cropped or cut off) and write a couple of caption options to match.</p>
+
+        <form id="upload-form">
+            <div class="card">
+                <label class="dropzone" id="dropzone" for="photo-input">
+                    <input type="file" id="photo-input" accept="image/jpeg,image/png,image/webp" />
+                    <div class="dropzone__icon" aria-hidden="true">📷</div>
+                    <div class="dropzone__text"><strong>Click to choose a photo</strong> or drag one here — JPEG, PNG, or WEBP, up to 15MB</div>
+                </label>
+                <div class="preview-row">
+                    <img class="preview-thumb" id="preview-thumb" alt="Selected photo preview" />
+                    <span class="preview-meta" id="preview-meta"></span>
+                    <button type="button" class="clear-btn" id="clear-btn">Remove</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="section-label">
+                    <span>Platforms &amp; sizes</span>
+                    <button type="button" class="select-all-btn" id="select-all-btn">Select all sizes</button>
+                </div>
+                <div id="platform-list">
+                    <p class="mono" style="font-size: 13px; color: var(--ink-soft);">Loading platforms…</p>
+                </div>
+            </div>
+
+            <button type="submit" class="generate-btn" id="generate-btn" disabled>Generate</button>
+
+            <div class="banner banner--error" id="error-banner" role="alert"></div>
+            <div class="loading-state" id="loading-state">
+                <span class="spinner" aria-hidden="true"></span>
+                <span>Resizing for each format and writing captions — this can take up to 40 seconds with many platforms selected…</span>
+            </div>
+        </form>
+
+        <section id="results">
+            <div class="section-label" style="margin-top: 44px;"><span>Results</span></div>
+            <div id="results-list"></div>
+        </section>
+    </main>
+
+    <script>
+        (() => {
+            const dropzone = document.getElementById('dropzone');
+            const photoInput = document.getElementById('photo-input');
+            const previewThumb = document.getElementById('preview-thumb');
+            const previewMeta = document.getElementById('preview-meta');
+            const clearBtn = document.getElementById('clear-btn');
+            const platformList = document.getElementById('platform-list');
+            const selectAllBtn = document.getElementById('select-all-btn');
+            const generateBtn = document.getElementById('generate-btn');
+            const form = document.getElementById('upload-form');
+            const errorBanner = document.getElementById('error-banner');
+            const loadingState = document.getElementById('loading-state');
+            const resultsSection = document.getElementById('results');
+            const resultsList = document.getElementById('results-list');
+
+            let selectedFile = null;
+            let platforms = []; // [{ id, label, formats: [{id,label,width,height,ratio,default}] }]
+
+            function showError(message) {
+                errorBanner.textContent = message;
+                errorBanner.classList.add('visible');
+            }
+            function hideError() {
+                errorBanner.classList.remove('visible');
+            }
+
+            function allFormatCheckboxes() {
+                return [...platformList.querySelectorAll('input[type="checkbox"][data-format]')];
+            }
+
+            function updateGenerateState() {
+                const anyChecked = allFormatCheckboxes().some((cb) => cb.checked);
+                generateBtn.disabled = !selectedFile || !anyChecked;
+            }
+
+            function syncPlatformHeaderState(platformId) {
+                const formatBoxes = allFormatCheckboxes().filter((cb) => cb.dataset.platform === platformId);
+                const header = platformList.querySelector(`input[data-platform-header="${platformId}"]`);
+                if (header) header.checked = formatBoxes.some((cb) => cb.checked);
+            }
+
+            // --- Load platform + format list from the backend ---
+            (async () => {
+                try {
+                    const res = await fetch('/api/uploads/platforms');
+                    if (!res.ok) throw new Error('Could not load platform list.');
+                    const data = await res.json();
+                    platforms = data.platforms;
+
+                    platformList.innerHTML = platforms.map((p) => `
+                        <div class="platform-block">
+                            <label class="platform-block__header">
+                                <input type="checkbox" data-platform-header="${p.id}" />
+                                ${p.label}
+                            </label>
+                            <div class="format-row">
+                                ${p.formats.map((f) => `
+                                    <label class="format-chip ${f.default ? 'checked' : ''}">
+                                        <input type="checkbox" data-format data-platform="${p.id}" data-format-id="${f.id}" ${f.default ? 'checked' : ''} />
+                                        ${f.label} <span class="ratio">${f.ratio}</span>
+                                    </label>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `).join('');
+
+                    allFormatCheckboxes().forEach((cb) => {
+                        cb.addEventListener('change', () => {
+                            cb.closest('.format-chip').classList.toggle('checked', cb.checked);
+                            syncPlatformHeaderState(cb.dataset.platform);
+                            updateGenerateState();
+                        });
+                    });
+
+                    platformList.querySelectorAll('input[data-platform-header]').forEach((header) => {
+                        header.addEventListener('change', () => {
+                            const pid = header.dataset.platformHeader;
+                            allFormatCheckboxes()
+                                .filter((cb) => cb.dataset.platform === pid)
+                                .forEach((cb) => {
+                                    cb.checked = header.checked;
+                                    cb.closest('.format-chip').classList.toggle('checked', cb.checked);
+                                });
+                            updateGenerateState();
+                        });
+                    });
+
+                    platforms.forEach((p) => syncPlatformHeaderState(p.id));
+                    updateGenerateState();
+                } catch (err) {
+                    platformList.innerHTML = '<p style="font-size: 13px; color: var(--coral);">Could not load platforms. Refresh the page to try again.</p>';
+                }
+            })();
+
+            selectAllBtn.addEventListener('click', () => {
+                const boxes = allFormatCheckboxes();
+                const allChecked = boxes.every((b) => b.checked);
+                boxes.forEach((b) => {
+                    b.checked = !allChecked;
+                    b.closest('.format-chip').classList.toggle('checked', b.checked);
+                });
+                platforms.forEach((p) => syncPlatformHeaderState(p.id));
+                selectAllBtn.textContent = allChecked ? 'Select all sizes' : 'Deselect all';
+                updateGenerateState();
+            });
+
+            // --- File selection ---
+            function handleFile(file) {
+                if (!file) return;
+                if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+                    showError('Please choose a JPEG, PNG, or WEBP image.');
+                    return;
+                }
+                if (file.size > 15 * 1024 * 1024) {
+                    showError('That file is larger than 15MB. Please choose a smaller photo.');
+                    return;
+                }
+                hideError();
+                selectedFile = file;
+                previewThumb.src = URL.createObjectURL(file);
+                previewThumb.style.display = 'block';
+                previewMeta.innerHTML = `<strong>${file.name}</strong><br>${(file.size / 1024 / 1024).toFixed(1)} MB`;
+                previewMeta.style.display = 'block';
+                clearBtn.style.display = 'block';
+                updateGenerateState();
+            }
+
+            photoInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
+
+            ['dragover', 'dragenter'].forEach((evt) =>
+                dropzone.addEventListener(evt, (e) => { e.preventDefault(); dropzone.classList.add('dragover'); })
+            );
+            ['dragleave', 'drop'].forEach((evt) =>
+                dropzone.addEventListener(evt, (e) => { e.preventDefault(); dropzone.classList.remove('dragover'); })
+            );
+            dropzone.addEventListener('drop', (e) => {
+                const file = e.dataTransfer.files[0];
+                if (file) handleFile(file);
+            });
+
+            clearBtn.addEventListener('click', () => {
+                selectedFile = null;
+                photoInput.value = '';
+                previewThumb.style.display = 'none';
+                previewMeta.style.display = 'none';
+                clearBtn.style.display = 'none';
+                updateGenerateState();
+            });
+
+            // --- Submit ---
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                hideError();
+                if (!selectedFile) return;
+
+                const variants = allFormatCheckboxes()
+                    .filter((cb) => cb.checked)
+                    .map((cb) => ({ platformId: cb.dataset.platform, formatId: cb.dataset.formatId }));
+
+                const formData = new FormData();
+                formData.append('photo', selectedFile);
+                formData.append('variants', JSON.stringify(variants));
+
+                generateBtn.disabled = true;
+                loadingState.classList.add('visible');
+                resultsSection.classList.remove('visible');
+
+                try {
+                    const res = await fetch('/api/uploads', { method: 'POST', body: formData });
+                    const data = await res.json();
+
+                    if (!res.ok) {
+                        showError(data.error || 'Something went wrong. Please try again.');
+                        return;
+                    }
+
+                    renderResults(data.upload);
+                } catch (err) {
+                    showError('Could not reach the server. Check your connection and try again.');
+                } finally {
+                    loadingState.classList.remove('visible');
+                    updateGenerateState();
+                }
+            });
+
+            function platformLabel(id) {
+                const p = platforms.find((pl) => pl.id === id);
+                return p ? p.label : id;
+            }
+
+            function optionText(option) {
+                return [option.caption, (option.hashtags || []).join(' ')].filter(Boolean).join('\n\n');
+            }
+
+            function escapeHtml(str) {
+                return String(str)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;');
+            }
+
+            // Holds the real options arrays in memory, keyed by group index —
+            // avoids ever having to serialize AI-generated text (which often
+            // contains apostrophes, quotes, etc.) into an HTML attribute.
+            let optionsByGroup = {};
+
+            function renderResults(upload) {
+                optionsByGroup = {};
+
+                // Group the generated image versions by platform.
+                const byPlatform = {};
+                upload.platformVersions.forEach((v) => {
+                    if (!byPlatform[v.platformId]) byPlatform[v.platformId] = [];
+                    byPlatform[v.platformId].push(v);
+                });
+
+                resultsList.innerHTML = Object.entries(byPlatform).map(([platformId, versions], groupIndex) => {
+                    const entry = upload.captions[platformId] || { options: [] };
+                    const options = entry.options && entry.options.length > 0 ? entry.options : [{ caption: '', hashtags: [] }];
+                    optionsByGroup[groupIndex] = options;
+
+                    const imagesHtml = versions.map((v) => `
+                        <div class="image-card">
+                            <img class="image-card__img" src="/api/uploads/${upload.id}/file/${v.platformId}/${v.formatId}" alt="${escapeHtml(v.label)}" loading="lazy" />
+                            <div class="image-card__label">${escapeHtml(v.label)} · ${v.width}×${v.height}</div>
+                        </div>
+                    `).join('');
+
+                    const optionButtonsHtml = options.map((opt, i) => `
+                        <button type="button" class="caption-option-btn ${i === 0 ? 'active' : ''}" data-group="${groupIndex}" data-option-index="${i}">Option ${i + 1}</button>
+                    `).join('');
+
+                    return `
+                        <div class="platform-result" data-group="${groupIndex}">
+                            <h3 class="platform-result__title">${escapeHtml(platformLabel(platformId))}</h3>
+                            <div class="image-row">${imagesHtml}</div>
+                            <div class="caption-panel">
+                                <div class="caption-options">${optionButtonsHtml}</div>
+                                <textarea class="caption-textarea" data-group="${groupIndex}">${escapeHtml(optionText(options[0]))}</textarea>
+                                <div class="caption-panel__footer">
+                                    <span class="caption-hint">Pick an option, or edit/write your own — Copy grabs whatever's in the box.</span>
+                                    <button type="button" class="copy-btn" data-group="${groupIndex}">Copy caption</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                // Wire up option-switching per platform group.
+                resultsList.querySelectorAll('.platform-result').forEach((block) => {
+                    const groupIndex = block.dataset.group;
+                    const options = optionsByGroup[groupIndex];
+                    const textarea = block.querySelector('.caption-textarea');
+
+                    block.querySelectorAll('.caption-option-btn').forEach((btn) => {
+                        btn.addEventListener('click', () => {
+                            block.querySelectorAll('.caption-option-btn').forEach((b) => b.classList.remove('active'));
+                            btn.classList.add('active');
+                            const idx = Number(btn.dataset.optionIndex);
+                            textarea.value = optionText(options[idx]); // .value, not innerHTML — no escaping needed here
+                        });
+                    });
+
+                    const copyBtn = block.querySelector('.copy-btn');
+                    copyBtn.addEventListener('click', async () => {
+                        try {
+                            await navigator.clipboard.writeText(textarea.value);
+                            copyBtn.textContent = 'Copied!';
+                            copyBtn.classList.add('copied');
+                            setTimeout(() => { copyBtn.textContent = 'Copy caption'; copyBtn.classList.remove('copied'); }, 1800);
+                        } catch {
+                            showError('Could not copy to clipboard. Select and copy the text manually.');
+                        }
+                    });
+                });
+
+                resultsSection.classList.add('visible');
+                resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        })();
+    </script>
+</body>
+</html>
+
