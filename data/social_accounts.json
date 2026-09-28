@@ -1,0 +1,24 @@
+[
+  {
+    "userId": "990c7992-6e34-47f4-8abb-679485f17bf3",
+    "provider": "google_business",
+    "providerAccountId": "demo_gbp_990c7992-6e34-47f4-8abb-679485f17bf3",
+    "accessToken": "demo_token",
+    "refreshToken": null,
+    "expiresAt": null,
+    "accountName": "My Business (Demo)",
+    "accountType": "google_business",
+    "connectedAt": "2026-07-05T13:38:26.803Z"
+  },
+  {
+    "userId": "990c7992-6e34-47f4-8abb-679485f17bf3",
+    "provider": "youtube",
+    "providerAccountId": "demo_yt_990c7992-6e34-47f4-8abb-679485f17bf3",
+    "accessToken": "demo_token",
+    "refreshToken": null,
+    "expiresAt": null,
+    "accountName": "My YouTube Channel (Demo)",
+    "accountType": "youtube_channel",
+    "connectedAt": "2026-07-05T13:38:26.805Z"
+  }
+]

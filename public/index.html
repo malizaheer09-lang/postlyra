@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Postlyra — Upload once. Show up everywhere.</title>
+    <meta name="description" content="Postlyra automatically reformats your content for every social platform. One upload, instant adaptation." />
+    <meta property="og:title" content="Postlyra — Upload once. Show up everywhere." />
+    <meta property="og:description" content="One upload. Every platform. Captions and layouts done by AI." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%231F7A6C'/><rect x='25' y='25' width='50' height='50' rx='10' fill='%23E8633A'/></svg>" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --paper: #FAF6EF;
+            --sand: #EFE5D4;
+            --ink: #1E2A26;
+            --ink-soft: #4A5650;
+            --teal: #1F7A6C;
+            --teal-deep: #16241F;
+            --coral: #E8633A;
+            --line: rgba(30, 42, 38, 0.12);
+            --radius: 14px;
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+            --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+            --shadow-card: 0 12px 32px rgba(30, 42, 38, 0.06);
+            --shadow-hover: 0 24px 56px rgba(30, 42, 38, 0.10);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            background: var(--paper);
+            color: var(--ink);
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+        h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; font-weight: 600; letter-spacing: -0.01em; }
+        .mono { font-family: 'IBM Plex Mono', monospace; }
+        a { color: inherit; text-decoration: none; }
+        .wrap { max-width: 1140px; margin: 0 auto; padding: 0 32px; }
+        section { position: relative; }
+        .skip-link {
+            position: absolute; top: 10px; left: 10px; background: var(--coral); color: #fff;
+            padding: 10px 18px; border-radius: 6px; transform: translateY(-120%);
+            transition: transform 0.2s; z-index: 200; font-weight: 500;
+        }
+        .skip-link:focus { transform: translateY(0); }
+        :focus-visible { outline: 2px solid var(--coral); outline-offset: 3px; }
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; padding: 12px 24px;
+            border-radius: 8px; font-weight: 500; font-size: 15px; cursor: pointer;
+            transition: all 0.25s var(--ease-out-expo); border: 1px solid transparent;
+            font-family: inherit; text-align: center; gap: 8px;
+        }
+        .btn--primary { background: var(--coral); color: #fff; border-color: var(--coral); box-shadow: 0 4px 0 rgba(0,0,0,0.06); }
+        .btn--primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(232,99,58,0.35); }
+        .btn--primary:active { transform: translateY(0); box-shadow: 0 2px 0 rgba(0,0,0,0.06); }
+        .btn--outline { background: transparent; color: var(--ink); border-color: var(--line); }
+        .btn--outline:hover { background: rgba(30,42,38,0.04); border-color: var(--teal); transform: translateY(-2px); }
+        .btn--ghost { background: transparent; color: var(--ink-soft); border-color: transparent; }
+        .btn--ghost:hover { color: var(--ink); background: rgba(30,42,38,0.04); }
+        .nav {
+            position: sticky; top: 0; z-index: 50; background: rgba(250,246,239,0.88);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--line); transition: box-shadow 0.3s;
+        }
+        .nav.scrolled { box-shadow: 0 1px 0 rgba(0,0,0,0.04), 0 4px 24px rgba(0,0,0,0.05); }
+        .nav__inner { display: flex; align-items: center; justify-content: space-between; height: 72px; }
+        .nav__logo { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 20px; display: flex; align-items: center; gap: 8px; }
+        .nav__logo-mark { width: 18px; height: 18px; border-radius: 4px; background: var(--teal); position: relative; transition: transform 0.3s var(--ease-out-back); }
+        .nav__logo:hover .nav__logo-mark { transform: rotate(90deg); }
+        .nav__logo-mark::after { content: ''; position: absolute; top: 50%; left: 50%; width: 6px; height: 6px; background: var(--coral); border-radius: 2px; transform: translate(-50%,-50%); }
+        .nav__links { display: flex; gap: 36px; font-size: 14px; color: var(--ink-soft); }
+        .nav__links a { padding: 4px 0; position: relative; }
+        .nav__links a::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 0; height: 1.5px; background: var(--teal); transition: width 0.3s var(--ease-out-expo); }
+        .nav__links a:hover { color: var(--ink); }
+        .nav__links a:hover::after { width: 100%; }
+        .nav__actions { display: flex; gap: 12px; align-items: center; }
+        .nav__btn { background: transparent; border: none; font-size: 14px; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: inherit; font-weight: 500; transition: all 0.25s; }
+        .nav__btn--signin { color: var(--ink); }
+        .nav__btn--signin:hover { background: rgba(30,42,38,0.05); }
+        .nav__btn--signup { background: var(--coral); color: #fff; }
+        .nav__btn--signup:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(232,99,58,0.3); }
+        .nav__badge { font-family: 'IBM Plex Mono', monospace; font-size: 9px; background: var(--teal); color: #fff; padding: 2px 10px; border-radius: 999px; letter-spacing: 0.06em; text-transform: uppercase; margin-left: 4px; }
+        @media (max-width: 760px) { .nav__links { display: none; } .nav__badge { display: none; } }
+        .hero { padding: 84px 0 60px; overflow: hidden; }
+        .hero__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; position: relative; z-index: 1; }
+        .hero__eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: .06em; color: var(--teal); text-transform: uppercase; margin-bottom: 18px; display: inline-block; }
+        .hero__title { font-size: 50px; line-height: 1.06; margin-bottom: 22px; }
+        .hero__title em { font-style: normal; color: var(--teal); position: relative; }
+        .hero__title em::after { content: ''; position: absolute; bottom: 2px; left: 0; width: 100%; height: 6px; background: rgba(31,122,108,0.15); border-radius: 2px; z-index: -1; }
+        .hero__lead { font-size: 18px; color: var(--ink-soft); max-width: 440px; margin-bottom: 32px; }
+        .hero__actions { display: flex; gap: 18px; flex-wrap: wrap; }
+        .diagram { position: relative; width: 100%; aspect-ratio: 1/0.92; }
+        .diagram svg { width: 100%; height: 100%; overflow: visible; }
+        .src-box { fill: var(--ink); }
+        .target-group { opacity: 0; animation: rise 0.7s ease forwards; transition: transform 0.35s var(--ease-out-back), filter 0.35s; }
+        .target-group:hover { transform: scale(1.12) translateY(-4px); filter: drop-shadow(0 12px 20px rgba(0,0,0,0.12)); z-index: 5; }
+        .target-box { fill: var(--paper); stroke: var(--line); stroke-width: 1.2; transition: stroke 0.3s; }
+        .target-group:hover .target-box { stroke-width: 2.5; stroke: var(--teal); }
+        .connector { fill: none; stroke: var(--ink); stroke-width: 1.4; stroke-opacity: 0.35; stroke-dasharray: 4 5; stroke-dashoffset: 200; animation: draw 1.6s ease forwards; }
+        .label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; fill: var(--ink-soft); transition: fill 0.3s, font-weight 0.3s; }
+        .target-group:hover .label { fill: var(--ink); font-weight: 500; }
+        @keyframes draw { to { stroke-dashoffset: 0; } }
+        @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .pulse { animation: pulseGlow 2.6s ease-in-out infinite; }
+        @keyframes pulseGlow { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
+        @media (max-width: 900px) { .hero__grid { grid-template-columns: 1fr; } .hero__title { font-size: 38px; } .diagram { max-width: 420px; margin: 0 auto; } }
+        .section-head { max-width: 560px; margin-bottom: 56px; }
+        .section-head__eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: .06em; color: var(--teal); text-transform: uppercase; margin-bottom: 14px; display: inline-block; }
+        .section-head__title { font-size: 34px; line-height: 1.15; }
+        .section-head__text { color: var(--ink-soft); margin-top: 14px; }
+        .section-head--center { max-width: 640px; margin-left: auto; margin-right: auto; text-align: center; }
+        .how { padding: 100px 0; }
+        .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+        .step { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 32px 26px; transition: transform 0.35s var(--ease-out-expo), box-shadow 0.35s, border-color 0.3s; }
+        .step:hover { transform: translateY(-6px); box-shadow: var(--shadow-hover); border-color: var(--teal); }
+        .step__num { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--teal); display: flex; align-items: center; gap: 10px; margin-bottom: 22px; }
+        .step__dot { width: 6px; height: 6px; border-radius: 50%; background: var(--coral); transition: transform 0.3s var(--ease-out-back); }
+        .step:hover .step__dot { transform: scale(1.8); }
+        .step__title { font-size: 19px; margin-bottom: 10px; }
+        .step__text { color: var(--ink-soft); font-size: 15px; }
+        @media (max-width: 760px) { .steps { grid-template-columns: 1fr; } }
+        .compare { padding: 100px 0; background: var(--sand); }
+        .compare__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); background: #fff; }
+        .compare__panel { padding: 48px 40px; transition: background 0.3s; }
+        .compare__panel--without { border-right: 1px solid var(--line); }
+        .compare__panel--without:hover { background: rgba(30,42,38,0.02); }
+        .compare__panel--with { background: rgba(31,122,108,0.04); }
+        .compare__panel--with:hover { background: rgba(31,122,108,0.07); }
+        .compare__label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 16px; display: inline-block; font-weight: 500; }
+        .compare__panel--with .compare__label { color: var(--teal); }
+        .compare__title { font-size: 26px; margin-bottom: 20px; }
+        .compare__panel--with .compare__title { color: var(--teal); }
+        .compare__list { list-style: none; display: flex; flex-direction: column; gap: 16px; }
+        .compare__list li { display: flex; align-items: flex-start; gap: 12px; font-size: 15px; color: var(--ink-soft); }
+        .compare__list li .icon { flex-shrink: 0; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; margin-top: 1px; }
+        .compare__list li .icon--cross { border: 1.5px solid var(--line); color: var(--ink-soft); }
+        .compare__list li .icon--check { background: var(--teal); color: #fff; }
+        @media (max-width: 760px) { .compare__grid { grid-template-columns: 1fr; } .compare__panel--without { border-right: none; border-bottom: 1px solid var(--line); } }
+        .stats { padding: 60px 0; background: var(--teal-deep); color: var(--paper); overflow: hidden; }
+        .stats__track { display: flex; gap: 60px; width: max-content; animation: scrollStats 32s linear infinite; }
+        .stats__item { flex-shrink: 0; display: flex; align-items: center; gap: 20px; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 28px; letter-spacing: -0.02em; white-space: nowrap; }
+        .stats__item .num { color: var(--coral); font-size: 32px; }
+        .stats__item .sep { color: rgba(250,246,239,0.2); font-weight: 300; }
+        @keyframes scrollStats { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        @media (prefers-reduced-motion: reduce) { .stats__track { animation: none; flex-wrap: wrap; justify-content: center; width: 100%; gap: 32px; } }
+        .platforms { padding: 80px 0; background: var(--sand); }
+        .pill-grid { display: flex; flex-wrap: wrap; gap: 12px; }
+        .pill { font-family: 'IBM Plex Mono', monospace; font-size: 13px; border: 1px solid var(--line); background: var(--paper); padding: 10px 18px; border-radius: 999px; color: var(--ink-soft); transition: all 0.25s var(--ease-out-expo); }
+        .pill:hover { border-color: var(--teal); color: var(--teal); background: #fff; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.05); }
+        .value { padding: 110px 0; background: var(--teal-deep); color: var(--paper); }
+        .value__title { font-size: 32px; max-width: 600px; line-height: 1.2; color: var(--paper); }
+        .value__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; margin-top: 48px; }
+        .value-list { list-style: none; display: flex; flex-direction: column; gap: 24px; }
+        .value-list li { display: flex; gap: 14px; font-size: 16px; color: rgba(250,246,239,0.85); transition: transform 0.3s; }
+        .value-list li:hover { transform: translateX(4px); }
+        .value-list__mark { width: 20px; height: 20px; border-radius: 5px; background: var(--coral); flex-shrink: 0; margin-top: 2px; transition: transform 0.3s var(--ease-out-back); }
+        .value-list li:hover .value-list__mark { transform: scale(1.2); background: #f07a55; }
+        @media (max-width: 760px) { .value__grid { grid-template-columns: 1fr; } }
+        .pricing { padding: 100px 0; }
+        .pricing__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; align-items: start; }
+        .plan { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 36px 28px; transition: transform 0.35s var(--ease-out-expo), box-shadow 0.35s; position: relative; display: flex; flex-direction: column; }
+        .plan:hover { transform: translateY(-8px); box-shadow: var(--shadow-hover); }
+        .plan--popular { border-color: var(--coral); box-shadow: 0 12px 24px rgba(0,0,0,0.04); }
+        .plan--popular:hover { box-shadow: 0 24px 48px rgba(232,99,58,0.15); }
+        .plan__badge { position: absolute; top: -12px; right: 24px; background: var(--coral); color: #fff; font-size: 12px; font-weight: 600; padding: 4px 16px; border-radius: 999px; animation: badgePulse 2.5s ease-in-out infinite; }
+        @keyframes badgePulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(232,99,58,0.4); } 50% { box-shadow: 0 0 0 10px rgba(232,99,58,0); } }
+        .plan__name { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 20px; margin-bottom: 6px; }
+        .plan__price { font-family: 'IBM Plex Mono', monospace; font-size: 36px; font-weight: 500; margin-bottom: 4px; }
+        .plan__price span { font-size: 16px; font-weight: 400; color: var(--ink-soft); }
+        .plan__desc { color: var(--ink-soft); font-size: 15px; margin-bottom: 24px; }
+        .plan__features { list-style: none; display: flex; flex-direction: column; gap: 14px; margin-bottom: 32px; flex: 1; }
+        .plan__features li { font-size: 14px; color: var(--ink-soft); padding-left: 22px; position: relative; }
+        .plan__features li::before { content: ''; position: absolute; left: 0; top: 6px; width: 8px; height: 8px; border-radius: 2px; background: var(--teal); transition: transform 0.3s var(--ease-out-back); }
+        .plan:hover .plan__features li::before { transform: rotate(45deg); }
+        .plan .btn { width: 100%; justify-content: center; }
+        @media (max-width: 900px) { .pricing__grid { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto; } }
+        .donation { padding: 80px 0; background: var(--sand); }
+        .donation__card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 48px 40px; text-align: center; max-width: 560px; margin: 0 auto; transition: box-shadow 0.35s; }
+        .donation__card:hover { box-shadow: var(--shadow-hover); }
+        .donation__title { font-size: 28px; margin-bottom: 12px; }
+        .donation__text { color: var(--ink-soft); margin-bottom: 28px; }
+        .donate-btn { display: inline-flex; align-items: center; gap: 10px; background: var(--teal); color: #fff; font-weight: 600; padding: 14px 32px; border-radius: 8px; font-size: 15px; transition: all 0.25s; box-shadow: 0 4px 0 rgba(0,0,0,0.06); }
+        .donate-btn:hover { background: #1a6b5e; transform: translateY(-3px); box-shadow: 0 12px 28px rgba(31,122,108,0.35); }
+        .donate-btn:active { transform: translateY(0); box-shadow: 0 2px 0 rgba(0,0,0,0.06); }
+        .footer { background: var(--ink); color: var(--paper); padding: 80px 0 36px; }
+        .footer__cta { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 32px; border-bottom: 1px solid rgba(250,246,239,0.12); padding-bottom: 48px; margin-bottom: 32px; }
+        .footer__title { font-size: 30px; max-width: 420px; }
+        .footer__actions { display: flex; gap: 14px; flex-wrap: wrap; }
+        .footer__btn { background: transparent; border: none; font-family: inherit; font-size: 15px; font-weight: 500; padding: 14px 28px; border-radius: 8px; cursor: pointer; transition: all 0.25s; }
+        .footer__btn--signin { border: 1px solid rgba(250,246,239,0.3); color: var(--paper); }
+        .footer__btn--signin:hover { background: rgba(250,246,239,0.08); transform: translateY(-2px); }
+        .footer__btn--signup { background: var(--coral); color: #fff; }
+        .footer__btn--signup:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(232,99,58,0.35); }
+        .footer__bottom { display: flex; justify-content: space-between; color: rgba(250,246,239,0.5); font-size: 13px; flex-wrap: wrap; gap: 12px; }
+        .footer__status { display: flex; align-items: center; gap: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: .06em; text-transform: uppercase; }
+        .footer__status-dot { width: 6px; height: 6px; border-radius: 50%; background: #4CAF50; animation: pulseDot 2s ease-in-out infinite; }
+        @keyframes pulseDot { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        .reveal { opacity: 0; transform: translateY(32px); transition: opacity 0.75s var(--ease-out-expo), transform 0.75s var(--ease-out-expo); }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+        .reveal-stagger>* { opacity: 0; transform: translateY(28px); transition: opacity 0.6s var(--ease-out-expo), transform 0.6s var(--ease-out-expo); }
+        .reveal-stagger.visible>*:nth-child(1) { transition-delay: 0s; opacity: 1; transform: translateY(0); }
+        .reveal-stagger.visible>*:nth-child(2) { transition-delay: 0.08s; opacity: 1; transform: translateY(0); }
+        .reveal-stagger.visible>*:nth-child(3) { transition-delay: 0.16s; opacity: 1; transform: translateY(0); }
+        .reveal-stagger.visible>*:nth-child(4) { transition-delay: 0.24s; opacity: 1; transform: translateY(0); }
+        .reveal-stagger.visible>*:nth-child(5) { transition-delay: 0.32s; opacity: 1; transform: translateY(0); }
+        .reveal-stagger.visible>*:nth-child(6) { transition-delay: 0.40s; opacity: 1; transform: translateY(0); }
+        @media (prefers-reduced-motion: reduce) { .reveal, .reveal-stagger>*, .target-group, .connector, .stats__track { animation: none !important; opacity: 1 !important; transform: none !important; transition: none !important; } }
+    </style>
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <header class="nav" id="navbar">
+        <div class="wrap nav__inner">
+            <a href="index.html" class="nav__logo" aria-label="Postlyra Home">
+                <span class="nav__logo-mark" aria-hidden="true"></span>
+                Postlyra
+                <span class="nav__badge">v2.0</span>
+            </a>
+            <nav class="nav__links" aria-label="Main navigation">
+                <a href="#how">How it works</a>
+                <a href="#platforms">Platforms</a>
+                <a href="#pricing">Pricing</a>
+            </nav>
+            <div class="nav__actions">
+                <a href="login.html" class="nav__btn nav__btn--signin">Sign In</a>
+                <a href="signup.html" class="nav__btn nav__btn--signup">Sign Up</a>
+            </div>
+        </div>
+    </header>
+    <main id="main-content">
+        <section class="hero">
+            <div class="wrap hero__grid">
+                <div class="reveal">
+                    <span class="hero__eyebrow">For business owners running things solo</span>
+                    <h1 class="hero__title">Upload once.<br />Show up <em>everywhere.</em></h1>
+                    <p class="hero__lead">Give it a raw photo, a finished poster, anything. It rebuilds the post for every platform you pick, writes the caption to match, and waits for your go‑ahead before anything goes public.</p>
+                    <div class="hero__actions">
+                        <a href="#pricing" class="btn btn--primary">See subscription plans</a>
+                        <a href="signup.html" class="btn btn--outline">Join the waitlist</a>
+                    </div>
+                </div>
+                <div class="diagram reveal" aria-hidden="true">
+                    <svg viewBox="0 0 420 380">
+                        <rect class="src-box" x="170" y="160" width="80" height="80" rx="10" />
+                        <g fill="none" stroke="#FAF6EF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="183" y="173" width="44" height="34" rx="4" />
+                            <circle cx="195" cy="183" r="4" />
+                            <path d="M183 201 l14 -12 l8 7 l22 -16 l12 9 v12 H183z" />
+                        </g>
+                        <text class="label" x="210" y="256" text-anchor="middle">your upload</text>
+                        <path class="connector" d="M170,180 C100,150 70,110 70,60" style="animation-delay:.1s" />
+                        <path class="connector" d="M180,160 C150,110 150,70 150,40" style="animation-delay:.25s" />
+                        <path class="connector" d="M250,160 C280,110 290,70 295,40" style="animation-delay:.4s" />
+                        <path class="connector" d="M250,200 C310,190 350,170 372,140" style="animation-delay:.55s" />
+                        <path class="connector" d="M180,240 C140,290 110,310 80,320" style="animation-delay:.7s" />
+                        <path class="connector" d="M240,240 C270,290 290,310 305,330" style="animation-delay:.85s" />
+                        <g class="target-group" style="animation-delay:.5s">
+                            <rect class="target-box" x="30" y="10" width="50" height="86" rx="10" stroke="var(--teal)" />
+                            <text x="55" y="58" text-anchor="middle" font-size="24" fill="var(--ink)">♪</text>
+                            <text class="label" x="55" y="112" text-anchor="middle">tiktok</text>
+                        </g>
+                        <g class="target-group" style="animation-delay:.65s">
+                            <rect class="target-box" x="120" y="6" width="64" height="64" rx="10" />
+                            <circle cx="152" cy="35" r="16" fill="none" stroke="var(--ink)" stroke-width="2" />
+                            <circle cx="152" cy="35" r="6" fill="var(--ink)" />
+                            <text class="label" x="152" y="86" text-anchor="middle">instagram</text>
+                        </g>
+                        <g class="target-group" style="animation-delay:.8s">
+                            <rect class="target-box" x="262" y="6" width="74" height="44" rx="10" stroke="var(--coral)" />
+                            <text x="299" y="34" text-anchor="middle" font-weight="bold" font-size="18" fill="var(--ink)">in</text>
+                            <text class="label" x="299" y="66" text-anchor="middle">linkedin</text>
+                        </g>
+                        <g class="target-group" style="animation-delay:.95s">
+                            <rect class="target-box" x="350" y="100" width="58" height="58" rx="10" />
+                            <text x="379" y="138" text-anchor="middle" font-weight="bold" font-size="24" fill="var(--ink)">P</text>
+                            <text class="label" x="379" y="172" text-anchor="middle">pinterest</text>
+                        </g>
+                        <g class="target-group" style="animation-delay:1.1s">
+                            <rect class="target-box" x="48" y="290" width="64" height="40" rx="10" />
+                            <text x="80" y="317" text-anchor="middle" font-weight="bold" font-size="18" fill="var(--ink)">𝕏</text>
+                            <text class="label" x="80" y="346" text-anchor="middle">x</text>
+                        </g>
+                        <g class="target-group" style="animation-delay:1.25s">
+                            <rect class="target-box" x="280" y="300" width="58" height="58" rx="10" stroke="var(--teal)" />
+                            <polygon points="303,318 303,340 325,329" fill="var(--ink)" />
+                            <text class="label" x="309" y="372" text-anchor="middle">youtube</text>
+                        </g>
+                        <rect class="src-box pulse" x="170" y="160" width="80" height="80" rx="10" opacity="0" />
+                    </svg>
+                </div>
+            </div>
+        </section>
+        <section class="compare" id="compare">
+            <div class="wrap">
+                <div class="section-head section-head--center reveal">
+                    <span class="section-head__eyebrow">The difference</span>
+                    <h2 class="section-head__title">Without vs. With Postlyra</h2>
+                    <p class="section-head__text">See how our platform transforms your social media workflow from friction to flow.</p>
+                </div>
+                <div class="compare__grid reveal">
+                    <div class="compare__panel compare__panel--without">
+                        <span class="compare__label">❌ Without Postlyra</span>
+                        <h3 class="compare__title">The friction</h3>
+                        <ul class="compare__list">
+                            <li><span class="icon icon--cross">✕</span> Hours of manual resizing per asset</li>
+                            <li><span class="icon icon--cross">✕</span> Caption burnout across 5+ platforms</li>
+                            <li><span class="icon icon--cross">✕</span> Fragmented publishing schedules</li>
+                            <li><span class="icon icon--cross">✕</span> No single source of truth for analytics</li>
+                        </ul>
+                    </div>
+                    <div class="compare__panel compare__panel--with">
+                        <span class="compare__label">✅ With Postlyra</span>
+                        <h3 class="compare__title">The flow</h3>
+                        <ul class="compare__list">
+                            <li><span class="icon icon--check">✓</span> Instant AI-driven platform adaptations</li>
+                            <li><span class="icon icon--check">✓</span> Context-aware AI copywriting</li>
+                            <li><span class="icon icon--check">✓</span> Single-click omnichannel deployment</li>
+                            <li><span class="icon icon--check">✓</span> Unified analytics dashboard</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="stats" aria-hidden="true">
+            <div class="stats__track">
+                <span class="stats__item"><span class="num">12×</span> faster publishing <span class="sep">·</span></span>
+                <span class="stats__item"><span class="num">84%</span> less manual work <span class="sep">·</span></span>
+                <span class="stats__item"><span class="num">7</span> platforms, 1 upload <span class="sep">·</span></span>
+                <span class="stats__item"><span class="num">AI</span> captions in seconds <span class="sep">·</span></span>
+                <span class="stats__item"><span class="num">12×</span> faster publishing <span class="sep">·</span></span>
+                <span class="stats__item"><span class="num">84%</span> less manual work <span class="sep">·</span></span>
+                <span class="stats__item"><span class="num">7</span> platforms, 1 upload <span class="sep">·</span></span>
+                <span class="stats__item"><span class="num">AI</span> captions in seconds <span class="sep">·</span></span>
+                <span class="stats__item"><span class="num">12×</span> faster publishing <span class="sep">·</span></span>
+                <span class="stats__item"><span class="num">84%</span> less manual work <span class="sep">·</span></span>
+                <span class="stats__item"><span class="num">7</span> platforms, 1 upload <span class="sep">·</span></span>
+                <span class="stats__item"><span class="num">AI</span> captions in seconds <span class="sep">·</span></span>
+            </div>
+        </section>
+        <section class="how" id="how">
+            <div class="wrap">
+                <div class="section-head reveal">
+                    <span class="section-head__eyebrow">How it works</span>
+                    <h2 class="section-head__title">Three steps. You're only needed for one of them.</h2>
+                </div>
+                <div class="steps reveal-stagger">
+                    <div class="step">
+                        <div class="step__num"><span class="step__dot"></span>01 / upload</div>
+                        <h3 class="step__title">Give it whatever you've got</h3>
+                        <p class="step__text">A raw clip, a half‑finished poster, or something already polished. It works with any of them.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step__num"><span class="step__dot"></span>02 / it works</div>
+                        <h3 class="step__title">It rebuilds the post per platform</h3>
+                        <p class="step__text">New layout for TikTok, a square crop for Instagram, a caption written in the right tone for each — done automatically.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step__num"><span class="step__dot"></span>03 / you approve</div>
+                        <h3 class="step__title">One tap, and it's live everywhere</h3>
+                        <p class="step__text">Nothing posts without your go‑ahead. Approve once, and it publishes across every platform you selected.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="platforms" id="platforms">
+            <div class="wrap">
+                <div class="section-head reveal">
+                    <span class="section-head__eyebrow">Coverage</span>
+                    <h2 class="section-head__title">Wherever your customers already are</h2>
+                    <p class="section-head__text">Connect as many or as few as you want. Add more later without starting over.</p>
+                </div>
+                <div class="pill-grid reveal-stagger">
+                    <span class="pill">Instagram</span><span class="pill">TikTok</span><span class="pill">YouTube</span>
+                    <span class="pill">Facebook</span><span class="pill">LinkedIn</span><span class="pill">X (Twitter)</span>
+                    <span class="pill">Pinterest</span><span class="pill">Threads</span><span class="pill">Snapchat</span>
+                    <span class="pill">Google Business</span><span class="pill">WhatsApp Business</span>
+                    <span class="pill">Telegram</span><span class="pill">Reddit</span><span class="pill">Bluesky</span><span class="pill">Tumblr</span>
+                </div>
+            </div>
+        </section>
+        <section class="value">
+            <div class="wrap">
+                <h2 class="value__title reveal">You didn't start a business to become a full‑time social media manager.</h2>
+                <div class="value__grid reveal-stagger">
+                    <ul class="value-list">
+                        <li><span class="value-list__mark"></span>No more writing the same caption five different ways by hand.</li>
+                        <li><span class="value-list__mark"></span>No more guessing what size image each platform actually wants.</li>
+                    </ul>
+                    <ul class="value-list">
+                        <li><span class="value-list__mark"></span>Nothing goes public without you seeing it first.</li>
+                        <li><span class="value-list__mark"></span>One upload, reshaped correctly for every platform you pick.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        <section class="pricing" id="pricing">
+            <div class="wrap">
+                <div class="section-head section-head--center reveal">
+                    <span class="section-head__eyebrow">Subscription</span>
+                    <h2 class="section-head__title">Plans that grow with your business</h2>
+                    <p class="section-head__text">All plans include the full dashboard, AI captioning, and platform adapters.</p>
+                </div>
+                <div class="pricing__grid reveal-stagger">
+                    <div class="plan">
+                        <h3 class="plan__name">Starter</h3>
+                        <div class="plan__price">$19<span>/mo</span></div>
+                        <p class="plan__desc">Perfect for solopreneurs just getting started.</p>
+                        <ul class="plan__features">
+                            <li>3 connected accounts</li>
+                            <li>100 AI captions / month</li>
+                            <li>30 AI redesigns / month</li>
+                            <li>Post scheduling</li>
+                            <li>Email support</li>
+                        </ul>
+                        <a href="signup.html" class="btn btn--outline">Choose Starter</a>
+                    </div>
+                    <div class="plan plan--popular">
+                        <span class="plan__badge">Most popular</span>
+                        <h3 class="plan__name">Pro</h3>
+                        <div class="plan__price">$39<span>/mo</span></div>
+                        <p class="plan__desc">For growing businesses ready to scale content.</p>
+                        <ul class="plan__features">
+                            <li>10 connected accounts</li>
+                            <li>500 AI captions / month</li>
+                            <li>150 AI redesigns / month</li>
+                            <li>Analytics dashboard</li>
+                            <li>Priority support</li>
+                        </ul>
+                        <a href="signup.html" class="btn btn--primary">Choose Pro</a>
+                    </div>
+                    <div class="plan">
+                        <h3 class="plan__name">Agency</h3>
+                        <div class="plan__price">$89<span>/mo</span></div>
+                        <p class="plan__desc">For teams managing multiple brands and clients.</p>
+                        <ul class="plan__features">
+                            <li>Unlimited accounts</li>
+                            <li>Multiple brands</li>
+                            <li>Team members</li>
+                            <li>Advanced analytics</li>
+                            <li>Priority support</li>
+                        </ul>
+                        <a href="signup.html" class="btn btn--outline">Choose Agency</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="donation">
+            <div class="wrap">
+                <div class="donation__card reveal">
+                    <h2 class="donation__title">Support independent development</h2>
+                    <p class="donation__text">Postlyra is built by a small, independent team. If you find it useful, consider supporting the project to help us keep improving.</p>
+                    <a href="https://www.buymeacoffee.com/" target="_blank" rel="noopener" class="donate-btn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                        </svg>
+                        Support the project
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="footer">
+        <div class="wrap">
+            <div class="footer__cta reveal">
+                <h2 class="footer__title">Ready to simplify your social media?</h2>
+                <div class="footer__actions">
+                    <a href="login.html" class="footer__btn footer__btn--signin">Sign In</a>
+                    <a href="signup.html" class="footer__btn footer__btn--signup">Sign Up</a>
+                </div>
+            </div>
+            <div class="footer__bottom">
+                <span>© <span id="current-year"></span> Postlyra. Built in Islamabad.</span>
+                <div class="footer__status">
+                    <span class="footer__status-dot"></span>
+                    All systems operational
+                </div>
+                <span class="mono">Made for owners who run the whole thing themselves.</span>
+            </div>
+        </div>
+    </footer>
+    <script>
+        (() => {
+            document.getElementById('current-year').textContent = new Date().getFullYear();
+            const navbar = document.getElementById('navbar');
+            let ticking = false;
+            window.addEventListener('scroll', () => {
+                if (!ticking) {
+                    requestAnimationFrame(() => {
+                        navbar.classList.toggle('scrolled', window.scrollY > 10);
+                        ticking = false;
+                    });
+                    ticking = true;
+                }
+            });
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.18, rootMargin: '0px 0px -40px 0px' });
+            document.querySelectorAll('.reveal, .reveal-stagger').forEach(el => observer.observe(el));
+        })();
+    </script>
+</body>
+</html>

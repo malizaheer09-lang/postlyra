@@ -1,0 +1,22 @@
+{
+  "name": "postlyra-backend",
+  "version": "1.0.0",
+  "description": "Auth backend + dashboard for Postlyra (signup, login, sessions)",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "@google/genai": "^2.10.0",
+    "axios": "^1.18.1",
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.6",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.2.0",
+    "sharp": "^0.33.5"
+  }
+}

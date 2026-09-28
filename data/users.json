@@ -1,0 +1,16 @@
+[
+  {
+    "id": "990c7992-6e34-47f4-8abb-679485f17bf3",
+    "businessName": "next",
+    "email": "test@gmail.com",
+    "passwordHash": "$2a$10$ccvx1Apsb1Mn0/FsS9AMheQgUVO99PG4ZoOafH3JxoxkVD0KE0nO2",
+    "createdAt": "2026-06-27T07:40:56.685Z"
+  },
+  {
+    "id": "e2fc0150-f40a-451d-b053-f0cfaebb7f36",
+    "businessName": "sweetandsour",
+    "email": "test2@gmail.com",
+    "passwordHash": "$2a$10$sV0mBtx6LDUK6v9WrYzbEuoX3A/Ch3owqqYHT7GN9n9b1wSfYHVvK",
+    "createdAt": "2026-09-22T12:19:38.758Z"
+  }
+]

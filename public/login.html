@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign in — Postlyra</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%231F7A6C'/><rect x='25' y='25' width='50' height='50' rx='10' fill='%23E8633A'/></svg>" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --paper: #FAF6EF;
+            --ink: #1E2A26;
+            --ink-soft: #4A5650;
+            --teal: #1F7A6C;
+            --teal-deep: #16241F;
+            --coral: #E8633A;
+            --line: rgba(30, 42, 38, 0.12);
+            --radius: 14px;
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--paper);
+            color: var(--ink);
+            font-family: 'Inter', sans-serif;
+            position: relative;
+            overflow: hidden;
+            padding: 24px;
+        }
+        .mono { font-family: 'IBM Plex Mono', monospace; }
+        a { color: inherit; }
+        :focus-visible { outline: 2px solid var(--coral); outline-offset: 3px; }
+
+        /* ===== AMBIENT BACKGROUND ===== */
+        .bg-shapes { position: fixed; inset: 0; z-index: 0; overflow: hidden; }
+        .bg-shape {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(2px);
+            opacity: 0.5;
+            animation: float 18s ease-in-out infinite;
+        }
+        .bg-shape--1 { width: 280px; height: 280px; background: rgba(31,122,108,0.10); top: -60px; left: -80px; animation-duration: 22s; }
+        .bg-shape--2 { width: 200px; height: 200px; background: rgba(232,99,58,0.08); bottom: -40px; right: -40px; animation-duration: 26s; animation-delay: -4s; }
+        .bg-shape--3 { width: 140px; height: 140px; background: rgba(31,122,108,0.07); top: 30%; right: 8%; animation-duration: 19s; animation-delay: -9s; }
+        .bg-shape--4 { width: 90px; height: 90px; border-radius: 18px; background: rgba(232,99,58,0.07); bottom: 18%; left: 10%; animation-duration: 24s; animation-delay: -2s; }
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(24px, -28px) rotate(12deg); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .bg-shape { animation: none; }
+        }
+
+        /* ===== CARD ===== */
+        .card {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 420px;
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: 44px 40px 36px;
+            box-shadow: 0 24px 56px rgba(30, 42, 38, 0.10);
+            animation: riseIn 0.6s var(--ease-out-expo) both;
+        }
+        @keyframes riseIn {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .card { animation: none; }
+        }
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 18px;
+            text-decoration: none;
+            margin-bottom: 28px;
+        }
+        .logo-mark {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            background: var(--teal);
+            position: relative;
+        }
+        .logo-mark::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 5px; height: 5px;
+            background: var(--coral);
+            border-radius: 2px;
+            transform: translate(-50%, -50%);
+        }
+        h1 { font-family: 'Space Grotesk', sans-serif; font-size: 26px; margin-bottom: 8px; }
+        .subtext { color: var(--ink-soft); font-size: 14.5px; margin-bottom: 28px; }
+
+        form { display: flex; flex-direction: column; gap: 18px; }
+        .field { display: flex; flex-direction: column; gap: 6px; }
+        label { font-size: 13px; font-weight: 500; color: var(--ink); }
+        input {
+            font-family: inherit;
+            font-size: 15px;
+            padding: 12px 14px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--paper);
+            color: var(--ink);
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+        }
+        input::placeholder { color: rgba(74, 86, 80, 0.5); }
+        input:focus {
+            outline: none;
+            border-color: var(--coral);
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(232, 99, 58, 0.14);
+        }
+        input[aria-invalid="true"] { border-color: var(--coral); }
+        .field-error {
+            font-size: 12.5px;
+            color: var(--coral);
+            min-height: 16px;
+            display: none;
+        }
+        .field-error.visible { display: block; }
+
+        .row-between { display: flex; justify-content: flex-end; margin-top: -8px; }
+        .link {
+            font-size: 13.5px;
+            color: var(--teal);
+            text-decoration: none;
+            font-weight: 500;
+            transition: opacity 0.2s;
+        }
+        .link:hover { opacity: 0.75; text-decoration: underline; }
+
+        .btn-submit {
+            margin-top: 6px;
+            background: var(--coral);
+            color: #fff;
+            border: none;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 15px;
+            padding: 13px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.25s var(--ease-out-expo);
+            box-shadow: 0 4px 0 rgba(0,0,0,0.06);
+        }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(232,99,58,0.32); }
+        .btn-submit:active { transform: translateY(0); box-shadow: 0 2px 0 rgba(0,0,0,0.06); }
+        .btn-submit:disabled { opacity: 0.65; cursor: not-allowed; transform: none; box-shadow: 0 4px 0 rgba(0,0,0,0.06); }
+
+        .form-banner {
+            font-size: 13.5px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            display: none;
+        }
+        .form-banner.visible { display: block; }
+        .form-banner--error { background: rgba(232,99,58,0.10); color: #B8431E; }
+        .form-banner--success { background: rgba(31,122,108,0.10); color: var(--teal); }
+
+        .switch-line {
+            text-align: center;
+            margin-top: 26px;
+            font-size: 14px;
+            color: var(--ink-soft);
+        }
+        .switch-line a { color: var(--coral); font-weight: 600; text-decoration: none; }
+        .switch-line a:hover { text-decoration: underline; }
+
+        .back-home {
+            position: fixed;
+            top: 24px;
+            left: 24px;
+            font-size: 13px;
+            color: var(--ink-soft);
+            text-decoration: none;
+            z-index: 2;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .back-home:hover { color: var(--ink); }
+    </style>
+</head>
+<body>
+    <div class="bg-shapes" aria-hidden="true">
+        <span class="bg-shape bg-shape--1"></span>
+        <span class="bg-shape bg-shape--2"></span>
+        <span class="bg-shape bg-shape--3"></span>
+        <span class="bg-shape bg-shape--4"></span>
+    </div>
+
+    <a href="index.html" class="back-home">← Back to Postlyra</a>
+
+    <main class="card">
+        <a href="index.html" class="logo">
+            <span class="logo-mark" aria-hidden="true"></span>
+            Postlyra
+        </a>
+
+        <h1>Welcome back</h1>
+        <p class="subtext">Sign in to manage your posts and platforms.</p>
+
+        <div id="form-banner" class="form-banner" role="alert" aria-live="polite"></div>
+
+        <form id="login-form" novalidate>
+            <div class="field">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="you@business.com" autocomplete="email" required />
+                <span class="field-error" id="email-error"></span>
+            </div>
+
+            <div class="field">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password" required />
+                <span class="field-error" id="password-error"></span>
+            </div>
+
+            <div class="row-between">
+                <a href="#" class="link" id="forgot-link">Forgot password?</a>
+            </div>
+
+            <button type="submit" class="btn-submit" id="submit-btn">Sign in</button>
+        </form>
+
+        <p class="switch-line">Don't have an account? <a href="signup.html">Sign up</a></p>
+    </main>
+
+    <script>
+        (() => {
+            const form = document.getElementById('login-form');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const emailError = document.getElementById('email-error');
+            const passwordError = document.getElementById('password-error');
+            const banner = document.getElementById('form-banner');
+            const submitBtn = document.getElementById('submit-btn');
+            const forgotLink = document.getElementById('forgot-link');
+
+            const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            function showBanner(message, kind) {
+                banner.textContent = message;
+                banner.className = 'form-banner visible form-banner--' + kind;
+            }
+            function hideBanner() {
+                banner.className = 'form-banner';
+            }
+            function setFieldError(input, errorEl, message) {
+                if (message) {
+                    input.setAttribute('aria-invalid', 'true');
+                    errorEl.textContent = message;
+                    errorEl.classList.add('visible');
+                } else {
+                    input.removeAttribute('aria-invalid');
+                    errorEl.textContent = '';
+                    errorEl.classList.remove('visible');
+                }
+            }
+
+            function validate() {
+                let ok = true;
+                if (!EMAIL_RE.test(emailInput.value.trim())) {
+                    setFieldError(emailInput, emailError, 'Enter a valid email address.');
+                    ok = false;
+                } else {
+                    setFieldError(emailInput, emailError, '');
+                }
+                if (!passwordInput.value) {
+                    setFieldError(passwordInput, passwordError, 'Password is required.');
+                    ok = false;
+                } else {
+                    setFieldError(passwordInput, passwordError, '');
+                }
+                return ok;
+            }
+
+            emailInput.addEventListener('input', () => setFieldError(emailInput, emailError, ''));
+            passwordInput.addEventListener('input', () => setFieldError(passwordInput, passwordError, ''));
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                hideBanner();
+                if (!validate()) return;
+
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Signing in…';
+
+                try {
+                    const res = await fetch('/api/auth/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            email: emailInput.value.trim(),
+                            password: passwordInput.value,
+                        }),
+                    });
+                    const data = await res.json();
+
+                    if (!res.ok) {
+                        showBanner(data.error || 'Something went wrong. Please try again.', 'error');
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Sign in';
+                        return;
+                    }
+
+                    showBanner('Signed in. Redirecting…', 'success');
+                    window.location.href = 'dashboard.html';
+                } catch (err) {
+                    showBanner('Could not reach the server. Check your connection and try again.', 'error');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Sign in';
+                }
+            });
+
+            forgotLink.addEventListener('click', async (e) => {
+                e.preventDefault();
+                hideBanner();
+                if (!EMAIL_RE.test(emailInput.value.trim())) {
+                    showBanner('Enter your email above first, then click "Forgot password?" again.', 'error');
+                    emailInput.focus();
+                    return;
+                }
+                try {
+                    const res = await fetch('/api/auth/forgot-password', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: emailInput.value.trim() }),
+                    });
+                    const data = await res.json();
+                    showBanner(data.message || 'If that email is registered, a reset link is on its way.', 'success');
+                } catch {
+                    showBanner('Could not reach the server. Please try again later.', 'error');
+                }
+            });
+        })();
+    </script>
+</body>
+</html>

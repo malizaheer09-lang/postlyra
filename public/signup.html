@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create your account — Postlyra</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%231F7A6C'/><rect x='25' y='25' width='50' height='50' rx='10' fill='%23E8633A'/></svg>" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --paper: #FAF6EF;
+            --ink: #1E2A26;
+            --ink-soft: #4A5650;
+            --teal: #1F7A6C;
+            --teal-deep: #16241F;
+            --coral: #E8633A;
+            --line: rgba(30, 42, 38, 0.12);
+            --radius: 14px;
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--paper);
+            color: var(--ink);
+            font-family: 'Inter', sans-serif;
+            position: relative;
+            overflow: hidden;
+            padding: 24px;
+        }
+        .mono { font-family: 'IBM Plex Mono', monospace; }
+        a { color: inherit; }
+        :focus-visible { outline: 2px solid var(--coral); outline-offset: 3px; }
+
+        .bg-shapes { position: fixed; inset: 0; z-index: 0; overflow: hidden; }
+        .bg-shape {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(2px);
+            opacity: 0.5;
+            animation: float 18s ease-in-out infinite;
+        }
+        .bg-shape--1 { width: 280px; height: 280px; background: rgba(232,99,58,0.09); top: -60px; right: -80px; animation-duration: 23s; }
+        .bg-shape--2 { width: 200px; height: 200px; background: rgba(31,122,108,0.09); bottom: -40px; left: -40px; animation-duration: 27s; animation-delay: -4s; }
+        .bg-shape--3 { width: 140px; height: 140px; background: rgba(232,99,58,0.06); top: 28%; left: 8%; animation-duration: 20s; animation-delay: -9s; }
+        .bg-shape--4 { width: 90px; height: 90px; border-radius: 18px; background: rgba(31,122,108,0.07); bottom: 16%; right: 10%; animation-duration: 25s; animation-delay: -2s; }
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(-22px, -26px) rotate(-10deg); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .bg-shape { animation: none; }
+        }
+
+        .card {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 440px;
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: 40px 40px 32px;
+            box-shadow: 0 24px 56px rgba(30, 42, 38, 0.10);
+            animation: riseIn 0.6s var(--ease-out-expo) both;
+        }
+        @keyframes riseIn {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .card { animation: none; }
+        }
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 18px;
+            text-decoration: none;
+            margin-bottom: 24px;
+        }
+        .logo-mark {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            background: var(--teal);
+            position: relative;
+        }
+        .logo-mark::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 5px; height: 5px;
+            background: var(--coral);
+            border-radius: 2px;
+            transform: translate(-50%, -50%);
+        }
+        h1 { font-family: 'Space Grotesk', sans-serif; font-size: 23px; line-height: 1.25; margin-bottom: 6px; }
+        .subtext { color: var(--ink-soft); font-size: 14.5px; margin-bottom: 22px; }
+
+        form { display: flex; flex-direction: column; gap: 16px; }
+        .field { display: flex; flex-direction: column; gap: 6px; }
+        label { font-size: 13px; font-weight: 500; color: var(--ink); }
+        input {
+            font-family: inherit;
+            font-size: 15px;
+            padding: 12px 14px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--paper);
+            color: var(--ink);
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+        }
+        input::placeholder { color: rgba(74, 86, 80, 0.5); }
+        input:focus {
+            outline: none;
+            border-color: var(--coral);
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(232, 99, 58, 0.14);
+        }
+        input[aria-invalid="true"] { border-color: var(--coral); }
+        .field-error {
+            font-size: 12.5px;
+            color: var(--coral);
+            min-height: 16px;
+            display: none;
+        }
+        .field-error.visible { display: block; }
+
+        /* password strength meter */
+        .strength {
+            display: flex;
+            gap: 5px;
+            margin-top: 2px;
+        }
+        .strength-bar {
+            flex: 1;
+            height: 4px;
+            border-radius: 2px;
+            background: var(--line);
+            transition: background 0.25s;
+        }
+        .strength-label {
+            font-size: 12px;
+            color: var(--ink-soft);
+            margin-top: 2px;
+        }
+
+        .checkbox-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-top: 2px;
+        }
+        .checkbox-row input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            margin-top: 2px;
+            accent-color: var(--coral);
+            flex-shrink: 0;
+        }
+        .checkbox-row label {
+            font-size: 13px;
+            color: var(--ink-soft);
+            font-weight: 400;
+            line-height: 1.5;
+        }
+        .checkbox-row a { color: var(--teal); font-weight: 500; text-decoration: underline; }
+
+        .btn-submit {
+            margin-top: 4px;
+            background: var(--coral);
+            color: #fff;
+            border: none;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 15px;
+            padding: 13px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.25s var(--ease-out-expo);
+            box-shadow: 0 4px 0 rgba(0,0,0,0.06);
+        }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(232,99,58,0.32); }
+        .btn-submit:active { transform: translateY(0); box-shadow: 0 2px 0 rgba(0,0,0,0.06); }
+        .btn-submit:disabled { opacity: 0.65; cursor: not-allowed; transform: none; box-shadow: 0 4px 0 rgba(0,0,0,0.06); }
+
+        .form-banner {
+            font-size: 13.5px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            display: none;
+        }
+        .form-banner.visible { display: block; }
+        .form-banner--error { background: rgba(232,99,58,0.10); color: #B8431E; }
+        .form-banner--success { background: rgba(31,122,108,0.10); color: var(--teal); }
+
+        .switch-line {
+            text-align: center;
+            margin-top: 22px;
+            font-size: 14px;
+            color: var(--ink-soft);
+        }
+        .switch-line a { color: var(--coral); font-weight: 600; text-decoration: none; }
+        .switch-line a:hover { text-decoration: underline; }
+
+        .back-home {
+            position: fixed;
+            top: 24px;
+            left: 24px;
+            font-size: 13px;
+            color: var(--ink-soft);
+            text-decoration: none;
+            z-index: 2;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .back-home:hover { color: var(--ink); }
+    </style>
+</head>
+<body>
+    <div class="bg-shapes" aria-hidden="true">
+        <span class="bg-shape bg-shape--1"></span>
+        <span class="bg-shape bg-shape--2"></span>
+        <span class="bg-shape bg-shape--3"></span>
+        <span class="bg-shape bg-shape--4"></span>
+    </div>
+
+    <a href="index.html" class="back-home">← Back to Postlyra</a>
+
+    <main class="card">
+        <a href="index.html" class="logo">
+            <span class="logo-mark" aria-hidden="true"></span>
+            Postlyra
+        </a>
+
+        <h1>Create your Postlyra account</h1>
+        <p class="subtext">One upload, every platform, captions included.</p>
+
+        <div id="form-banner" class="form-banner" role="alert" aria-live="polite"></div>
+
+        <form id="signup-form" novalidate>
+            <div class="field">
+                <label for="business-name">Business name</label>
+                <input type="text" id="business-name" name="businessName" placeholder="Your business name" autocomplete="organization" required />
+                <span class="field-error" id="business-name-error"></span>
+            </div>
+
+            <div class="field">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="you@business.com" autocomplete="email" required />
+                <span class="field-error" id="email-error"></span>
+            </div>
+
+            <div class="field">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="At least 8 characters" autocomplete="new-password" required />
+                <div class="strength" aria-hidden="true">
+                    <span class="strength-bar" id="bar-1"></span>
+                    <span class="strength-bar" id="bar-2"></span>
+                    <span class="strength-bar" id="bar-3"></span>
+                    <span class="strength-bar" id="bar-4"></span>
+                </div>
+                <span class="strength-label" id="strength-label">Use 8+ characters with a letter and a number</span>
+                <span class="field-error" id="password-error"></span>
+            </div>
+
+            <div class="field">
+                <label for="confirm-password">Confirm password</label>
+                <input type="password" id="confirm-password" name="confirmPassword" placeholder="Re-enter your password" autocomplete="new-password" required />
+                <span class="field-error" id="confirm-password-error"></span>
+            </div>
+
+            <div class="checkbox-row">
+                <input type="checkbox" id="terms" name="terms" required />
+                <label for="terms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.</label>
+            </div>
+            <span class="field-error" id="terms-error"></span>
+
+            <button type="submit" class="btn-submit" id="submit-btn">Create account</button>
+        </form>
+
+        <p class="switch-line">Already have an account? <a href="login.html">Sign in</a></p>
+    </main>
+
+    <script>
+        (() => {
+            const form = document.getElementById('signup-form');
+            const businessNameInput = document.getElementById('business-name');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const confirmInput = document.getElementById('confirm-password');
+            const termsInput = document.getElementById('terms');
+
+            const businessNameError = document.getElementById('business-name-error');
+            const emailError = document.getElementById('email-error');
+            const passwordError = document.getElementById('password-error');
+            const confirmError = document.getElementById('confirm-password-error');
+            const termsError = document.getElementById('terms-error');
+
+            const strengthBars = [
+                document.getElementById('bar-1'),
+                document.getElementById('bar-2'),
+                document.getElementById('bar-3'),
+                document.getElementById('bar-4'),
+            ];
+            const strengthLabel = document.getElementById('strength-label');
+            const banner = document.getElementById('form-banner');
+            const submitBtn = document.getElementById('submit-btn');
+
+            const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            function showBanner(message, kind) {
+                banner.textContent = message;
+                banner.className = 'form-banner visible form-banner--' + kind;
+            }
+            function hideBanner() {
+                banner.className = 'form-banner';
+            }
+            function setFieldError(input, errorEl, message) {
+                if (message) {
+                    input.setAttribute('aria-invalid', 'true');
+                    errorEl.textContent = message;
+                    errorEl.classList.add('visible');
+                } else {
+                    input.removeAttribute('aria-invalid');
+                    errorEl.textContent = '';
+                    errorEl.classList.remove('visible');
+                }
+            }
+
+            function passwordScore(pw) {
+                let score = 0;
+                if (pw.length >= 8) score++;
+                if (pw.length >= 12) score++;
+                if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) score++;
+                if (/[0-9]/.test(pw) && /[^A-Za-z0-9]/.test(pw)) score++;
+                return Math.min(score, 4);
+            }
+
+            function isStrongEnough(pw) {
+                return pw.length >= 8 && /[A-Za-z]/.test(pw) && /[0-9]/.test(pw);
+            }
+
+            const STRENGTH_COLORS = ['var(--line)', '#E8633A', '#E8A33A', '#1F7A6C', '#1F7A6C'];
+            const STRENGTH_LABELS = [
+                'Use 8+ characters with a letter and a number',
+                'Weak — try adding numbers or length',
+                'Okay — add a symbol or more length for stronger',
+                'Good password strength',
+                'Excellent password strength',
+            ];
+
+            passwordInput.addEventListener('input', () => {
+                const score = passwordInput.value ? passwordScore(passwordInput.value) : 0;
+                strengthBars.forEach((bar, i) => {
+                    bar.style.background = i < score ? STRENGTH_COLORS[score] : 'var(--line)';
+                });
+                strengthLabel.textContent = STRENGTH_LABELS[score];
+                setFieldError(passwordInput, passwordError, '');
+            });
+
+            businessNameInput.addEventListener('input', () => setFieldError(businessNameInput, businessNameError, ''));
+            emailInput.addEventListener('input', () => setFieldError(emailInput, emailError, ''));
+            confirmInput.addEventListener('input', () => setFieldError(confirmInput, confirmError, ''));
+            termsInput.addEventListener('change', () => setFieldError(termsInput, termsError, ''));
+
+            function validate() {
+                let ok = true;
+
+                if (!businessNameInput.value.trim()) {
+                    setFieldError(businessNameInput, businessNameError, 'Business name is required.');
+                    ok = false;
+                } else {
+                    setFieldError(businessNameInput, businessNameError, '');
+                }
+
+                if (!EMAIL_RE.test(emailInput.value.trim())) {
+                    setFieldError(emailInput, emailError, 'Enter a valid email address.');
+                    ok = false;
+                } else {
+                    setFieldError(emailInput, emailError, '');
+                }
+
+                if (!isStrongEnough(passwordInput.value)) {
+                    setFieldError(passwordInput, passwordError, 'Use at least 8 characters, including a letter and a number.');
+                    ok = false;
+                } else {
+                    setFieldError(passwordInput, passwordError, '');
+                }
+
+                if (confirmInput.value !== passwordInput.value || !confirmInput.value) {
+                    setFieldError(confirmInput, confirmError, 'Passwords do not match.');
+                    ok = false;
+                } else {
+                    setFieldError(confirmInput, confirmError, '');
+                }
+
+                if (!termsInput.checked) {
+                    termsError.textContent = 'You must agree to the Terms of Service.';
+                    termsError.classList.add('visible');
+                    ok = false;
+                } else {
+                    termsError.textContent = '';
+                    termsError.classList.remove('visible');
+                }
+
+                return ok;
+            }
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                hideBanner();
+                if (!validate()) return;
+
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Creating account…';
+
+                try {
+                    const res = await fetch('/api/auth/signup', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            businessName: businessNameInput.value.trim(),
+                            email: emailInput.value.trim(),
+                            password: passwordInput.value,
+                            confirmPassword: confirmInput.value,
+                            agreedToTerms: termsInput.checked,
+                        }),
+                    });
+                    const data = await res.json();
+
+                    if (!res.ok) {
+                        showBanner(data.error || 'Something went wrong. Please try again.', 'error');
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Create account';
+                        return;
+                    }
+
+                    showBanner('Account created. Redirecting…', 'success');
+                    window.location.href = 'dashboard.html';
+                } catch (err) {
+                    showBanner('Could not reach the server. Check your connection and try again.', 'error');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Create account';
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
